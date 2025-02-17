@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-workload
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-workload
+  template:
+    metadata:
+      labels:
+        app: test-workload
+        spiffe.io/spire-managed-identity: "true"
+    spec:
+      serviceAccountName: test-workload
+      containers:
+        - name: main-app
+          image: curlimages/curl
+          command: ["sleep", "infinity"]
+          volumeMounts:
+            - name: spiffe-jwt
+              mountPath: /run/spiffe/jwt
+              readOnly: true
+        - name: spiffe-helper
+          image: ghcr.io/spiffe/spiffe-helper:0.9.0
+          args:
+            - -config
+            - /run/spiffe/helper.conf
+          volumeMounts:
+            - name: spiffe-helper-config
+              mountPath: /run/spiffe/helper.conf
+              subPath: helper.conf
+            - name: spiffe-jwt
+              mountPath: /run/spiffe/jwt
+            - name: spire-agent-socket
+              mountPath: /run/spire/agent-sockets
+              readOnly: true
+      volumes:
+        - name: spiffe-helper-config
+          configMap:
+            name: spiffe-helper-config
+        - name: spiffe-jwt
+          emptyDir: {}
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/agent-sockets
+            type: Directory

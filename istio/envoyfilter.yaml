@@ -1,0 +1,46 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: egress-jwt-validation
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      app: istio-egressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.jwt_authn
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+            providers:
+              spire-jwt:
+                issuer: "http://localhost:8080"
+                audiences:
+                  - "app"
+                remote_jwks:
+                  http_uri:
+                    uri: "http://spire-oidc.spire-oidc.svc.cluster.local:8080/keys"
+                    cluster: "outbound|8080||spire-oidc.spire-oidc.svc.cluster.local"
+                    timeout: 5s
+                  cache_duration: 300s
+                from_headers:
+                  - name: "Authorization"
+                    value_prefix: "Bearer "
+                forward: true
+            rules:
+              - match:
+                  prefix: "/"
+                requires:
+                  provider_and_audiences:
+                    provider_name: spire-jwt
+                    audiences:
+                      - "app"

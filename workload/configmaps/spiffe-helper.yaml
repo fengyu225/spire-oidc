@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spiffe-helper-config
+  namespace: app
+data:
+  helper.conf: |
+    agent_address = "/run/spire/agent-sockets/socket"
+    cert_dir = "/run/spiffe"
+    daemon_mode = true
+    jwt_svid_file_mode = 0644
+    jwt_svids = [{
+      jwt_audience = "app"
+      jwt_svid_file_name = "jwt/svid.jwt"
+    }]

@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-http-service
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  selector:
+    app: test-http-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-http-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-http-server
+  template:
+    metadata:
+      labels:
+        app: test-http-server
+    spec:
+      containers:
+        - name: http-server
+          image: hashicorp/http-echo
+          args:
+            - "-text=hello world"
+            - "-listen=:8080"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: test-service-entry
+spec:
+  hosts:
+    - test-http-service.default.svc.cluster.local
+  location: MESH_EXTERNAL
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: test-egress-route
+spec:
+  hosts:
+    - test-http-service.default.svc.cluster.local
+  gateways:
+    - mesh
+    - istio-system/istio-egressgateway
+  http:
+    - match:
+        - gateways:
+            - mesh
+          port: 80
+      route:
+        - destination:
+            host: istio-egressgateway.istio-system.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - gateways:
+            - istio-system/istio-egressgateway
+      route:
+        - destination:
+            host: test-http-service.default.svc.cluster.local
+            port:
+              number: 80

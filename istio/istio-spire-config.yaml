@@ -1,0 +1,49 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-spire-config
+  namespace: istio-system
+spec:
+  profile: default
+  components:
+    egressGateways:
+      - name: istio-egressgateway
+        enabled: true
+        k8s:
+          overlays:
+            - apiVersion: apps/v1
+              kind: Deployment
+              name: istio-egressgateway
+              patches:
+                - path: spec.template.metadata.labels
+                  value:
+                    app: istio-egressgateway
+                    istio: egressgateway
+                    spiffe.io/spire-managed-identity: "true"
+                - path: spec.selector.matchLabels
+                  value:
+                    app: istio-egressgateway
+                    istio: egressgateway
+                    spiffe.io/spire-managed-identity: "true"
+                - path: spec.template.spec.serviceAccountName
+                  value: istio-egressgateway-service-account
+                - path: spec.template.spec.volumes[-1]
+                  value:
+                    name: spire-agent-socket
+                    hostPath:
+                      path: /run/spire/agent-sockets
+                      type: Directory
+                - path: spec.template.spec.containers[0].volumeMounts[-1]
+                  value:
+                    name: spire-agent-socket
+                    mountPath: /run/spire/agent-sockets
+                    readOnly: true
+  meshConfig:
+    trustDomain: example.org
+  values:
+    global:
+      jwtPolicy: third-party-jwt
+    gateways:
+      istio-egressgateway:
+        env:
+          SPIFFE_ENDPOINT_SOCKET: /run/spire/agent-sockets/socket
