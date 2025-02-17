@@ -118,3 +118,7 @@ kubectl exec -n app $(kubectl get pod -n app -l app=test-workload -o jsonpath='{
     step crypto jwt verify --subtle --jwks \
     <(kubectl exec -n spire-oidc curl-test -- curl -s http://spire-oidc:8080/keys)
 ```
+
+
+## Reference
+- [Envoy Http Filter JWT Authentication](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/jwt_authn/v3/config.proto#envoy-v3-api-msg-extensions-filters-http-jwt-authn-v3-remotejwks)
