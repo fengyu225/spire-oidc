@@ -60,9 +60,14 @@ kubectl apply -f vault-certs-secret.yaml
 kubectl apply -k spire
 
 # Verify OIDC discovery endpoint
-kubectl run curl-test --image=curlimages/curl -n spire-oidc -- sleep infinity
-kubectl exec -n spire-oidc curl-test -- curl http://spire-oidc:8080/.well-known/openid-configuration
+kubectl run curl-test --image=curlimages/curl -n oidc-provider -- sleep infinity
+kubectl exec -n oidc-provider curl-test -- curl http://oidc-provider:8080/.well-known/openid-configuration
+kubectl exec -n oidc-provider curl-test -- curl http://oidc-provider:8080/keys
+
+# Check registration entries
+kubectl exec -n spire $(kubectl get pod -n spire -l app=spire-server -o jsonpath='{.items[0].metadata.name}') -c spire-server -- /opt/spire/bin/spire-server entry show
 ```
+
 
 ### 4. Configure Workload JWT-SVID
 
@@ -118,7 +123,3 @@ kubectl exec -n app $(kubectl get pod -n app -l app=test-workload -o jsonpath='{
     step crypto jwt verify --subtle --jwks \
     <(kubectl exec -n spire-oidc curl-test -- curl -s http://spire-oidc:8080/keys)
 ```
-
-
-## Reference
-- [Envoy Http Filter JWT Authentication](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/jwt_authn/v3/config.proto#envoy-v3-api-msg-extensions-filters-http-jwt-authn-v3-remotejwks)
