@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spire-oidc-provider
-  namespace: spire-oidc
+  namespace: oidc-provider
   labels:
     app: spire-oidc-provider
 spec:
@@ -12,14 +12,14 @@ spec:
       app: spire-oidc-provider
   template:
     metadata:
-      namespace: spire-oidc
+      namespace: oidc-provider
       labels:
         app: spire-oidc-provider
         spiffe.io/spire-managed-identity: "true"
     spec:
-      serviceAccountName: spire-oidc
+      serviceAccountName: oidc-provider
       containers:
-        - name: spire-oidc
+        - name: oidc-provider
           image: ghcr.io/spiffe/oidc-discovery-provider:1.11.0
           args:
             - -config

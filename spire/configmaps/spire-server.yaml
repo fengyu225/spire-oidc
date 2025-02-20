@@ -40,7 +40,7 @@ data:
         plugin_data {
           clusters = {
             "spire-demo" = {
-              service_account_allow_list = ["spire:spire-agent", "spire:spire-oidc"]
+              service_account_allow_list = ["spire:spire-agent", "spire:oidc-provider"]
             }
           }
         }

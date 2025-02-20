@@ -52,7 +52,8 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
         - name: spire-controller-manager
-          image: ghcr.io/spiffe/spire-controller-manager:0.6.0
+#          image: ghcr.io/spiffe/spire-controller-manager:0.6.0
+          image: docker.io/fengyu225/spire-controller-manager:latest
           args: ["--config=spire-controller-manager-config.yaml"]
           ports:
             - containerPort: 9443

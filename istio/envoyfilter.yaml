@@ -28,8 +28,8 @@ spec:
                   - "app"
                 remote_jwks:
                   http_uri:
-                    uri: "http://spire-oidc.spire-oidc.svc.cluster.local:8080/keys"
-                    cluster: "outbound|8080||spire-oidc.spire-oidc.svc.cluster.local"
+                    uri: "http://oidc-provider.oidc-provider.svc.cluster.local:8080/keys"
+                    cluster: "outbound|8080||oidc-provider.oidc-provider.svc.cluster.local"
                     timeout: 5s
                   cache_duration: 300s
                 from_headers:

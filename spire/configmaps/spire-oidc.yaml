@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: oidc-discovery-provider
-  namespace: spire-oidc
+  namespace: oidc-provider
 data:
   oidc-discovery-provider.conf: |
     log_level = "DEBUG"
-    domains = ["localhost", "spire-oidc", "spire-oidc.spire-oidc", "spire-oidc.spire-oidc.svc", "spire-oidc.spire-oidc.svc.cluster.local"]
+    domains = ["localhost", "oidc-provider", "oidc-provider.oidc-provider", "oidc-provider.oidc-provider.svc", "oidc-provider.oidc-provider.svc.cluster.local"]
     allow_insecure_scheme = true
     insecure_addr = ":8080"
     workload_api {
